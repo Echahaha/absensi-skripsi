@@ -29,6 +29,8 @@ class AuthController extends Controller
             if (Auth::attempt(['email' => $input, 'password' => $password], true)) {
                 return redirect()->intended('admin/dashboard');
             }
+
+            return back()->withErrors(['msg' => 'Login Gagal! Email atau Password salah.']);
         }
 
         // SKENARIO 2: Login ORANG TUA (NIM)
@@ -36,39 +38,48 @@ class AuthController extends Controller
             $mhs = Mahasiswa::where('nim', $input)->first();
 
             if ($mhs && Hash::check($password, $mhs->password)) {
+
+                // Flush session lama sebelum set yang baru
+                session()->flush();
+                session()->regenerate(true);
+
                 session([
                     'id_mahasiswa' => $mhs->id,
                     'nama_mahasiswa' => $mhs->nama_lengkap,
+                    'nim' => $mhs->nim,
                     'role' => 'ortu'
                 ]);
 
-                request()->session()->regenerate();
+                // Hapus cookie lama, lalu set cookie baru
+                $forgetCookie = cookie()->forget('ortu_id');
 
-                // ✅ FIX: Secure=false karena pakai http (ngrok),
-                // SameSite=lax lebih kompatibel dari none
                 $cookie = cookie(
-                    'ortu_id',      // nama
-                    $mhs->id,       // value
-                    525600,         // 1 tahun dalam menit
-                    '/',            // path
-                    null,           // domain
-                    false,          // secure (false karena http)
-                    false,          // httpOnly (false agar WebView bisa baca)
-                    false,          // raw
-                    'lax'           // ✅ ganti dari 'none' ke 'lax'
+                    'ortu_id',  // nama
+                    $mhs->id,   // value
+                    120,        // 120 menit
+                    '/',        // path
+                    null,       // domain
+                    false,      // secure (false karena http)
+                    true,       // httpOnly (true lebih aman)
+                    false,      // raw
+                    'lax'       // sameSite
                 );
 
-                return redirect()->intended('dashboard')->withCookie($cookie);
+                return redirect()->intended('dashboard')
+                    ->withoutCookie('ortu_id')
+                    ->withCookie($forgetCookie)
+                    ->withCookie($cookie);
             }
-        }
 
-        return back()->withErrors(['msg' => 'Login Gagal! NIM atau Password salah.']);
+            return back()->withErrors(['msg' => 'Login Gagal! NIM atau Password salah.']);
+        }
     }
 
     public function logout()
     {
         Auth::logout();
         session()->flush();
+        session()->regenerate(true);
 
         $cookie = cookie()->forget('ortu_id');
 
