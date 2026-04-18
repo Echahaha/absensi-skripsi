@@ -87,7 +87,8 @@ class OrtuController extends Controller
                 'id' => $absen->id,
                 'nama' => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
                 // Kirim waktu created_at asli dari database dalam format jam:menit:detik
-                'waktu' => $absen->created_at->format('H:i:s')
+                'waktu' => $absen->created_at->format('H:i:s'),
+                'status' => $absen->status ?? 'hadir'
             ]);
         }
 
