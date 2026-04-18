@@ -71,18 +71,12 @@ class OrtuController extends Controller
 
     public function apiCekAbsen()
     {
+        // 1. Paksa timezone ke Jakarta agar sinkron dengan jam asli kita
         date_default_timezone_set('Asia/Jakarta');
 
-        // ✅ Ambil ID mahasiswa dari session/cookie
-        $id_mhs = $this->restoreSession();
-
-        if (!$id_mhs) {
-            return response()->json(['ada_data' => false]);
-        }
-
-        // ✅ Filter hanya absen milik mahasiswa yang login
+        // 2. Ambil data absen yang masuk dalam 45 DETIK terakhir
+        // Pakai 45 detik agar ada "napas" buat Android Service menangkap datanya
         $absen = \App\Models\Absensi::with('mahasiswa')
-            ->where('mahasiswa_id', $id_mhs)
             ->where('created_at', '>=', now()->subSeconds(45))
             ->latest()
             ->first();
@@ -92,6 +86,7 @@ class OrtuController extends Controller
                 'ada_data' => true,
                 'id' => $absen->id,
                 'nama' => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
+                // Kirim waktu created_at asli dari database dalam format jam:menit:detik
                 'waktu' => $absen->created_at->format('H:i:s'),
                 'status' => $absen->status ?? 'hadir'
             ]);
