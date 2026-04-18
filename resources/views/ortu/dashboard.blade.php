@@ -566,10 +566,11 @@
             {{-- Stats Row --}}
             @php
                 $totalHadir = $riwayat->where('status', 'Hadir')->count();
-                $totalTerlambat = $riwayat->where('status', 'Terlambat')->count();
-                $totalAlpha = $riwayat->where('status', '!=', 'Hadir')->where('status', '!=', 'Terlambat')->count();
+                $totalIzin = $riwayat->where('status', 'Izin')->count();
+                $totalSakit = $riwayat->where('status', 'Sakit')->count();
+                $totalAlpha = $riwayat->where('status', 'Alpha')->count();
             @endphp
-            <div class="stats-row">
+            <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-card">
                     <div class="stat-icon" style="background:var(--green-light); color:var(--green);">
                         <i class="fas fa-check-circle"></i>
@@ -580,12 +581,21 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background:var(--yellow-light); color:var(--yellow);">
-                        <i class="fas fa-clock"></i>
+                    <div class="stat-icon" style="background:#e0f2fe; color:#0284c7;">
+                        <i class="fas fa-file-alt"></i>
                     </div>
                     <div>
-                        <div class="stat-value" style="color:var(--yellow);">{{ $totalTerlambat }}</div>
-                        <div class="stat-label">Terlambat</div>
+                        <div class="stat-value" style="color:#0284c7;">{{ $totalIzin }}</div>
+                        <div class="stat-label">Izin</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:var(--yellow-light); color:var(--yellow);">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="color:var(--yellow);">{{ $totalSakit }}</div>
+                        <div class="stat-label">Sakit</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -633,9 +643,14 @@
                                         <td>
                                             @if($item->status == 'Hadir')
                                                 <span class="status-pill hadir"><i class="fas fa-check"></i> Hadir</span>
-                                            @elseif($item->status == 'Terlambat')
-                                                <span class="status-pill terlambat"><i class="fas fa-exclamation"></i>
-                                                    Terlambat</span>
+                                            @elseif($item->status == 'Izin')
+                                                <span class="status-pill" style="background:#e0f2fe;color:#0284c7;">
+                                                    <i class="fas fa-file-alt"></i> Izin
+                                                </span>
+                                            @elseif($item->status == 'Sakit')
+                                                <span class="status-pill terlambat">
+                                                    <i class="fas fa-thermometer-half"></i> Sakit
+                                                </span>
                                             @else
                                                 <span class="status-pill alpha"><i class="fas fa-times"></i>
                                                     {{ $item->status }}</span>
@@ -671,13 +686,20 @@
                                             {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
                                         </div>
                                     </div>
-                                @elseif($absen_hari_ini->status == 'Terlambat')
-                                    <div class="status-banner terlambat">
-                                        <i class="fas fa-exclamation-circle fa-3x mb-3" style="color:var(--yellow)"></i>
-                                        <div style="font-size:22px; font-weight:800; color:var(--yellow);">TERLAMBAT</div>
+                                @elseif($absen_hari_ini->status == 'Izin')
+                                    <div class="status-banner" style="background:#e0f2fe;border:1.5px solid #7dd3fc;">
+                                        <i class="fas fa-file-alt fa-3x mb-3" style="color:#0284c7"></i>
+                                        <div style="font-size:22px; font-weight:800; color:#0284c7;">IZIN</div>
                                         <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
+                                            <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
+                                        </div>
+                                    </div>
+                                @elseif($absen_hari_ini->status == 'Sakit')
+                                    <div class="status-banner terlambat">
+                                        <i class="fas fa-thermometer-half fa-3x mb-3" style="color:var(--yellow)"></i>
+                                        <div style="font-size:22px; font-weight:800; color:var(--yellow);">SAKIT</div>
+                                        <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
+                                            <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
                                         </div>
                                     </div>
                                 @else
@@ -764,14 +786,22 @@
                                         {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
                                     </span>
                                 </div>
-                            @elseif($absen_hari_ini->status == 'Terlambat')
-                                <i class="fas fa-exclamation-circle fa-3x mb-2" style="color:var(--yellow)"></i>
-                                <h3 class="fw-bold mb-0" style="color:var(--yellow)">TERLAMBAT</h3>
+                            @elseif($absen_hari_ini->status == 'Izin')
+                                <i class="fas fa-file-alt fa-3x mb-2" style="color:#0284c7"></i>
+                                <h3 class="fw-bold mb-0" style="color:#0284c7">IZIN</h3>
+                                <div class="mt-3">
+                                    <span class="badge px-4 py-2 rounded-pill"
+                                        style="background:#e0f2fe;color:#0284c7;border:1px solid #7dd3fc;">
+                                        <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
+                                    </span>
+                                </div>
+                            @elseif($absen_hari_ini->status == 'Sakit')
+                                <i class="fas fa-thermometer-half fa-3x mb-2" style="color:var(--yellow)"></i>
+                                <h3 class="fw-bold mb-0" style="color:var(--yellow)">SAKIT</h3>
                                 <div class="mt-3">
                                     <span class="badge px-4 py-2 rounded-pill"
                                         style="background:var(--yellow-light);color:var(--yellow);border:1px solid #fcd34d;">
-                                        <i class="fas fa-clock me-1"></i>
-                                        {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
+                                        <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
                                     </span>
                                 </div>
                             @else

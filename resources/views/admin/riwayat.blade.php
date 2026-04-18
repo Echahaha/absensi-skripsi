@@ -556,12 +556,13 @@
         {{-- Stats --}}
         @php
             $totalHadir = $riwayat->where('status', 'Hadir')->count();
-            $totalTerlambat = $riwayat->where('status', 'Terlambat')->count();
-            $totalAlpha = $riwayat->whereNotIn('status', ['Hadir', 'Terlambat'])->count();
+            $totalIzin = $riwayat->where('status', 'Izin')->count();
+            $totalSakit = $riwayat->where('status', 'Sakit')->count();
+            $totalAlpha = $riwayat->where('status', 'Alpha')->count();
         @endphp
         <div class="px-3 px-md-0 mb-3">
             <div class="row g-3">
-                <div class="col-4">
+                <div class="col-6 col-md-3">
                     <div class="stat-card">
                         <div class="stat-icon" style="background:var(--green-light);color:var(--green);">
                             <i class="fas fa-check-circle"></i>
@@ -572,18 +573,29 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-6 col-md-3">
                     <div class="stat-card">
-                        <div class="stat-icon" style="background:var(--yellow-light);color:var(--yellow);">
-                            <i class="fas fa-clock"></i>
+                        <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;">
+                            <i class="fas fa-file-alt"></i>
                         </div>
                         <div>
-                            <div class="stat-value" style="color:var(--yellow);">{{ $totalTerlambat }}</div>
-                            <div class="stat-label">Terlambat</div>
+                            <div class="stat-value" style="color:#0284c7;">{{ $totalIzin }}</div>
+                            <div class="stat-label">Izin</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:var(--yellow-light);color:var(--yellow);">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" style="color:var(--yellow);">{{ $totalSakit }}</div>
+                            <div class="stat-label">Sakit</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
                     <div class="stat-card">
                         <div class="stat-icon" style="background:var(--red-light);color:var(--red);">
                             <i class="fas fa-times-circle"></i>
@@ -604,8 +616,10 @@
                 <button class="filter-btn active" onclick="filterTable('semua', this)">Semua</button>
                 <button class="filter-btn green" onclick="filterTable('Hadir', this)"><i
                         class="fas fa-check me-1"></i>Hadir</button>
-                <button class="filter-btn yellow" onclick="filterTable('Terlambat', this)"><i
-                        class="fas fa-exclamation me-1"></i>Terlambat</button>
+                <button class="filter-btn" style="border-color:#7dd3fc;color:#0284c7;"
+                    onclick="filterTable('Izin', this)"><i class="fas fa-file-alt me-1"></i>Izin</button>
+                <button class="filter-btn yellow" onclick="filterTable('Sakit', this)"><i
+                        class="fas fa-thermometer-half me-1"></i>Sakit</button>
                 <button class="filter-btn red" onclick="filterTable('Alpha', this)"><i
                         class="fas fa-times me-1"></i>Alpha</button>
                 <input type="text" class="search-input mt-2 mt-md-0" id="searchInput"
@@ -669,7 +683,7 @@
                     </thead>
                     <tbody>
                         @forelse($riwayat as $i => $item)
-                            @php $statusKey = in_array($item->status, ['Hadir', 'Terlambat']) ? $item->status : 'Alpha'; @endphp
+                            @php $statusKey = in_array($item->status, ['Hadir', 'Izin', 'Sakit']) ? $item->status : 'Alpha'; @endphp
                             <tr data-status="{{ $statusKey }}" data-name="{{ strtolower($item->mahasiswa->nama_lengkap) }}">
                                 <td style="color:var(--gray-400);font-weight:600;">{{ $i + 1 }}</td>
                                 <td>
@@ -693,8 +707,14 @@
                                 <td>
                                     @if($item->status == 'Hadir')
                                         <span class="status-pill hadir"><i class="fas fa-check"></i> Hadir</span>
-                                    @elseif($item->status == 'Terlambat')
-                                        <span class="status-pill terlambat"><i class="fas fa-exclamation"></i> Terlambat</span>
+                                    @elseif($item->status == 'Izin')
+                                        <span class="status-pill" style="background:#e0f2fe;color:#0284c7;">
+                                            <i class="fas fa-file-alt"></i> Izin
+                                        </span>
+                                    @elseif($item->status == 'Sakit')
+                                        <span class="status-pill terlambat">
+                                            <i class="fas fa-thermometer-half"></i> Sakit
+                                        </span>
                                     @else
                                         <span class="status-pill alpha"><i class="fas fa-times"></i> {{ $item->status }}</span>
                                     @endif
@@ -725,7 +745,7 @@
         {{-- Mobile: Cards --}}
         <div class="px-3 d-md-none">
             @forelse($riwayat as $item)
-                @php $statusKey = in_array($item->status, ['Hadir', 'Terlambat']) ? $item->status : 'Alpha'; @endphp
+                @php $statusKey = in_array($item->status, ['Hadir', 'Izin', 'Sakit']) ? $item->status : 'Alpha'; @endphp
                 <div class="history-card mb-3 p-3" data-status="{{ $statusKey }}"
                     data-name="{{ strtolower($item->mahasiswa->nama_lengkap) }}">
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
@@ -748,8 +768,14 @@
                         </div>
                         @if($item->status == 'Hadir')
                             <span class="status-pill hadir"><i class="fas fa-check"></i> Hadir</span>
-                        @elseif($item->status == 'Terlambat')
-                            <span class="status-pill terlambat"><i class="fas fa-exclamation"></i> Terlambat</span>
+                        @elseif($item->status == 'Izin')
+                            <span class="status-pill" style="background:#e0f2fe;color:#0284c7;">
+                                <i class="fas fa-file-alt"></i> Izin
+                            </span>
+                        @elseif($item->status == 'Sakit')
+                            <span class="status-pill terlambat">
+                                <i class="fas fa-thermometer-half"></i> Sakit
+                            </span>
                         @else
                             <span class="status-pill alpha"><i class="fas fa-times"></i> {{ $item->status }}</span>
                         @endif
