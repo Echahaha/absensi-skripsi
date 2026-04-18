@@ -94,4 +94,22 @@ class OrtuController extends Controller
 
         return response()->json(['ada_data' => false]);
     }
+    public function cekStatusDashboard()
+    {
+        $id_mhs = $this->restoreSession();
+
+        if (!$id_mhs) {
+            return response()->json(['redirect' => '/login']);
+        }
+
+        $absen_hari_ini = Absensi::where('mahasiswa_id', $id_mhs)
+            ->whereDate('created_at', now())
+            ->first();
+
+        return response()->json([
+            'ada_absen' => $absen_hari_ini ? true : false,
+            'status' => $absen_hari_ini->status ?? null,
+            'waktu' => $absen_hari_ini ? \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') : null,
+        ]);
+    }
 }

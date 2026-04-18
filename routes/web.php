@@ -68,6 +68,7 @@ Route::get('/api/cek-absen-terbaru', [OrtuController::class, 'apiCekAbsen']);
 
 Route::middleware(['cek.ortu'])->group(function () {
     Route::get('/dashboard', [OrtuController::class, 'index'])->name('ortu.dashboard');
+    Route::get('/dashboard/cek-status', [OrtuController::class, 'cekStatusDashboard'])->name('ortu.cek.status');
     Route::get('/dashboard/riwayat', [OrtuController::class, 'riwayat'])->name('ortu.riwayat');
     Route::get('/profil', [ProfileController::class, 'index'])->name('profil.index');
     Route::post('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
