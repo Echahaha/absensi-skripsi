@@ -90,17 +90,19 @@ class MahasiswaController extends Controller
     public function destroy($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-        $fingerprintId = $mahasiswa->id_fingerprint;
+        $fingerprintId = $mahasiswa->fingerprint_id; // ✅ fix nama kolom
 
-        // ✅ Tulis ke tabel pengaturans (sama seperti yang dibaca apiCekAlat)
-        DB::table('pengaturans')->where('id', 1)->update([
-            'mode_alat' => 'delete',
-            'id_enroll' => $fingerprintId,
-        ]);
+        // Pastikan fingerprint_id tidak null sebelum update
+        if ($fingerprintId) {
+            DB::table('pengaturans')->where('id', 1)->update([
+                'mode_alat' => 'delete',
+                'id_enroll' => $fingerprintId,
+            ]);
+        }
 
         $mahasiswa->delete();
 
-        return redirect()->back()->with('success', 'Mahasiswa dihapus');
+        return redirect()->back()->with('success', 'Mahasiswa berhasil dihapus');
     }
 
     public function registrasi($id_finger)
