@@ -107,8 +107,6 @@ class MahasiswaController extends Controller
 
     public function registrasi($id_finger)
     {
-        // Cek apakah fingerprint_id ini sudah dipakai mahasiswa LAIN
-        // yang sudah terdaftar (is_finger_registered = true)
         $sudahTerdaftar = Mahasiswa::where('fingerprint_id', (int) $id_finger)
             ->where('is_finger_registered', true)
             ->exists();
@@ -120,16 +118,10 @@ class MahasiswaController extends Controller
             ], 400);
         }
 
-        // Cek apakah ada mahasiswa lain (bukan yang punya id_finger ini)
-        // yang sudah registered dengan fingerprint_id yang sama
-        $konflik = Mahasiswa::where('fingerprint_id', '!=', (int) $id_finger)
-            ->where('is_finger_registered', true)
-            ->whereRaw('fingerprint_id = ?', [(int) $id_finger])
-            ->exists();
-
         DB::table('pengaturans')->where('id', 1)->update([
             'mode_alat' => 'enroll',
             'id_enroll' => (int) $id_finger,
+            'hasil_enroll' => '',   // ← RESET hasil lama
             'updated_at' => now()
         ]);
 
@@ -200,17 +192,15 @@ class MahasiswaController extends Controller
     public function hasilEnroll(Request $request)
     {
         $fingerprint_id = (int) $request->fingerprint_id;
-        $status = $request->status; // 'sukses' atau 'gagal'
+        $status = $request->status;
 
         if ($status === 'sukses') {
-            // Update mahasiswa jadi terdaftar
             Mahasiswa::where('fingerprint_id', $fingerprint_id)
                 ->update(['is_finger_registered' => true]);
         }
 
-        // Simpan hasil ke tabel pengaturans agar web bisa baca
         DB::table('pengaturans')->where('id', 1)->update([
-            'hasil_enroll' => $status, // 'sukses' atau 'gagal'
+            'hasil_enroll' => $status,
             'mode_alat' => 'scan',
             'id_enroll' => 0,
         ]);
