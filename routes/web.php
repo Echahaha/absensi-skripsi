@@ -49,6 +49,12 @@ Route::get('/api/cek-status-registrasi', [MahasiswaController::class, 'cekStatus
 
 // batalkan proses enroll (jika admin klik batal di web)
 Route::post('/admin/batal-enroll', [AdminController::class, 'batalEnroll'])->name('enroll.batal');
+// Untuk memunculkan nama mahasiswa di LCD saat scan (opsional, bisa dipanggil dari Arduino)
+Route::get('/api/nama-mahasiswa', function(\Illuminate\Http\Request $request) {
+    $mhs = \App\Models\Mahasiswa::where('fingerprint_id', $request->fingerprint_id)->first();
+    if (!$mhs) return response()->json(['nama' => '']);
+    return response()->json(['nama' => $mhs->nama_lengkap]);
+});
 
 // Endpoint absensi utama yang dipanggil Arduino
 // [FIX #2] Sekarang langsung panggil controller, lebih bersih
