@@ -1163,52 +1163,58 @@
                 new bootstrap.Modal(document.getElementById('modalHapus')).show();
             }
 
-            // ─── FINGERPRINT ─────────────────────────────────────────────────
             let intervalCheck;
             let fingerModal;
 
             function konfirmasiRegistrasi(finger_id, nama) {
-                // Gunakan konfirmasi yang lebih cantik atau biarkan bawaan browser
                 if (confirm(`Mulai registrasi sidik jari untuk ${nama}?`)) {
                     document.getElementById('namaMhsText').innerText = nama;
 
-                    // Inisialisasi modal
                     const modalEl = document.getElementById('modalFinger');
                     fingerModal = new bootstrap.Modal(modalEl);
-
-                    // Reset status tampilan modal
                     document.getElementById('statusBadge').innerText = "Menghubungkan ke alat...";
                     document.getElementById('statusBadge').className = "badge bg-warning text-dark";
-
                     fingerModal.show();
 
-                    // Panggil endpoint Laravel untuk ubah mode ke 'enroll'
-                    fetch(`/admin/mahasiswa/registrasi/${finger_id}`)
-                        .then(res => res.json())
+                    fetch(`/admin/mahasiswa/registrasi/${finger_id}`, {
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error('HTTP ' + res.status);
+                            return res.json();
+                        })
                         .then(data => {
                             if (data.status === 'ready') {
                                 document.getElementById('statusBadge').innerText = "Alat Siap! Silakan Tempel Jari";
                                 document.getElementById('statusBadge').className = "badge bg-success";
-                                // Mulai cek status setiap 2 detik apakah alat sudah selesai
                                 intervalCheck = setInterval(cekHasilRegistrasi, 2000);
+                            } else {
+                                document.getElementById('statusBadge').innerText = "Error: " + data.message;
+                                document.getElementById('statusBadge').className = "badge bg-danger";
                             }
                         })
                         .catch(err => {
-                            console.error(err);
-                            alert("Gagal menghubungkan ke server.");
+                            fingerModal.hide();
+                            alert("Gagal menghubungkan ke server: " + err.message);
                         });
                 }
             }
 
             function cekHasilRegistrasi() {
-                fetch('/api/cek-status-registrasi')
+                fetch('/api/cek-status-registrasi', {
+                    credentials: 'same-origin'
+                })
                     .then(res => res.json())
                     .then(data => {
-
-                        // Selama mode masih 'enroll', artinya Arduino belum selesai
                         if (data.mode === 'enroll') return;
 
-                        // Mode sudah kembali ke 'scan' → Arduino sudah selesai, cek hasil
+                        // ← PENTING: kalau hasil masih kosong, tunggu dulu jangan tutup modal
+                        if (data.hasil_enroll === '' || data.hasil_enroll === null) return;
+
                         clearInterval(intervalCheck);
 
                         if (data.hasil_enroll === 'sukses') {
@@ -1218,18 +1224,12 @@
                                 bootstrap.Modal.getInstance(document.getElementById('modalFinger')).hide();
                                 location.reload();
                             }, 1500);
-                        }
-                        else if (data.hasil_enroll === 'gagal') {
+                        } else if (data.hasil_enroll === 'gagal') {
                             document.getElementById('statusBadge').innerText = "❌ Registrasi Gagal!";
                             document.getElementById('statusBadge').className = "badge bg-danger";
                             setTimeout(() => {
                                 bootstrap.Modal.getInstance(document.getElementById('modalFinger')).hide();
-                                location.reload();
-                            }, 1500);
-                        }
-                        else {
-                            // hasil_enroll kosong tapi mode sudah scan → kemungkinan dibatalkan
-                            bootstrap.Modal.getInstance(document.getElementById('modalFinger')).hide();
+                            }, 2000);
                         }
                     });
             }
@@ -1237,17 +1237,14 @@
             function batalkanRegistrasi() {
                 clearInterval(intervalCheck);
 
-                fetch('/admin/mahasiswa/reset-mode-alat?action=batal')
+                fetch('/admin/mahasiswa/reset-mode-alat?action=batal', {
+                    credentials: 'same-origin'
+                })
                     .then(res => res.json())
                     .then(() => {
                         bootstrap.Modal.getInstance(document.getElementById('modalFinger')).hide();
-                        alert("Registrasi dibatalkan");
-                    })
-                    .catch(() => {
-                        bootstrap.Modal.getInstance(document.getElementById('modalFinger')).hide();
                     });
             }
-
             // ─── SEARCH TABLE ─────────────────────────────────────────────────
             function filterTable() {
                 const q = document.getElementById('searchInput').value.toLowerCase();
