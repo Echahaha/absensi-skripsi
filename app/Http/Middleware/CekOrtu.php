@@ -5,16 +5,14 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use App\Models\Mahasiswa;
-use Symfony\Component\HttpFoundation\Response; // Tambahkan ini
+use Symfony\Component\HttpFoundation\Response;
 
 class CekOrtu
 {
-    // Tambahkan return type : Response agar tidak error di Laravel 11
-    public function handle(Request $request, Closure $next): Response 
+    public function handle(Request $request, Closure $next): Response
     {
         $id_mhs = session('id_mahasiswa');
 
-        // Cek cookie sebagai backup (ini sudah benar)
         if (!$id_mhs) {
             $id_mhs = $request->cookie('ortu_id');
 
@@ -26,13 +24,15 @@ class CekOrtu
                         'nama_mahasiswa' => $mhs->nama_lengkap,
                         'role' => 'ortu'
                     ]);
-                    // Jangan pakai regenerate() di dalam middleware karena bisa bikin loop redirect
-                    // $request->session()->regenerate(); 
                 }
             }
         }
 
         if (!session('id_mahasiswa') || session('role') !== 'ortu') {
+            // ✅ FIX: Jika request dari Android/API → JSON, bukan redirect
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['unauthenticated' => true], 401);
+            }
             return redirect('/login');
         }
 

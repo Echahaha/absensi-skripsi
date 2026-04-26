@@ -69,36 +69,37 @@ class OrtuController extends Controller
         return view('ortu.riwayat', compact('riwayat', 'mahasiswa')); // ← tambah 'mahasiswa'
     }
 
-    public function apiCekAbsen()
-    {
-        date_default_timezone_set('Asia/Jakarta');
+    public function apiCekAbsen(Request $request)
+{
+    date_default_timezone_set('Asia/Jakarta');
 
-        // ✅ Ambil ID mahasiswa dari session/cookie
-        $id_mhs = $this->restoreSession();
+    // Coba restore session seperti biasa
+    $id_mhs = $this->restoreSession();
 
-        if (!$id_mhs) {
-            return response()->json(['ada_data' => false]);
-        }
-
-        // ✅ Filter hanya absen milik mahasiswa yang login
-        $absen = \App\Models\Absensi::with('mahasiswa')
-            ->where('mahasiswa_id', $id_mhs)
-            ->where('created_at', '>=', now()->subSeconds(45))
-            ->latest()
-            ->first();
-
-        if ($absen) {
-            return response()->json([
-                'ada_data' => true,
-                'id' => $absen->id,
-                'nama' => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
-                'waktu' => $absen->created_at->format('H:i:s'),
-                'status' => $absen->status ?? 'hadir'
-            ]);
-        }
-
-        return response()->json(['ada_data' => false]);
+    // Jika masih kosong, cek apakah request dari Android (ada header Accept: application/json)
+    // Session Laravel sudah dibawa lewat Cookie header — tinggal baca dari auth
+    if (!$id_mhs) {
+        return response()->json(['ada_data' => false, 'unauthenticated' => true], 401);
     }
+
+    $absen = \App\Models\Absensi::with('mahasiswa')
+        ->where('mahasiswa_id', $id_mhs)
+        ->where('created_at', '>=', now()->subSeconds(45))
+        ->latest()
+        ->first();
+
+    if ($absen) {
+        return response()->json([
+            'ada_data' => true,
+            'id'       => $absen->id,
+            'nama'     => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
+            'waktu'    => $absen->created_at->format('H:i:s'),
+            'status'   => $absen->status ?? 'hadir',
+        ]);
+    }
+
+    return response()->json(['ada_data' => false]);
+}
     public function cekStatusDashboard()
     {
         $id_mhs = $this->restoreSession();
