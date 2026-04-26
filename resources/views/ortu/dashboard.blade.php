@@ -565,10 +565,10 @@
 
             {{-- Stats Row --}}
             @php
-                $totalHadir = $riwayat->where('status', 'Hadir')->count();
-                $totalIzin = $riwayat->where('status', 'Izin')->count();
-                $totalSakit = $riwayat->where('status', 'Sakit')->count();
-                $totalAlpha = $riwayat->where('status', 'Alpha')->count();
+            $totalHadir = $riwayat->where('status', 'Hadir')->count();
+            $totalIzin = $riwayat->where('status', 'Izin')->count();
+            $totalSakit = $riwayat->where('status', 'Sakit')->count();
+            $totalAlpha = $riwayat->where('status', 'Alpha')->count();
             @endphp
             <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
                 <div class="stat-card">
@@ -633,35 +633,35 @@
                             </thead>
                             <tbody>
                                 @forelse($riwayat as $item)
-                                    <tr>
-                                        <td style="font-weight:600;">
-                                            {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y') }}
-                                        </td>
-                                        <td style="font-weight:700; color:var(--gray-800);">
-                                            {{ \Carbon\Carbon::parse($item->waktu_masuk)->format('H:i') }} WIB
-                                        </td>
-                                        <td>
-                                            @if($item->status == 'Hadir')
-                                                <span class="status-pill hadir"><i class="fas fa-check"></i> Hadir</span>
-                                            @elseif($item->status == 'Izin')
-                                                <span class="status-pill" style="background:#e0f2fe;color:#0284c7;">
-                                                    <i class="fas fa-file-alt"></i> Izin
-                                                </span>
-                                            @elseif($item->status == 'Sakit')
-                                                <span class="status-pill terlambat">
-                                                    <i class="fas fa-thermometer-half"></i> Sakit
-                                                </span>
-                                            @else
-                                                <span class="status-pill alpha"><i class="fas fa-times"></i>
-                                                    {{ $item->status }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td style="font-weight:600;">
+                                        {{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y') }}
+                                    </td>
+                                    <td style="font-weight:700; color:var(--gray-800);">
+                                        {{ \Carbon\Carbon::parse($item->waktu_masuk)->format('H:i') }} WIB
+                                    </td>
+                                    <td>
+                                        @if($item->status == 'Hadir')
+                                        <span class="status-pill hadir"><i class="fas fa-check"></i> Hadir</span>
+                                        @elseif($item->status == 'Izin')
+                                        <span class="status-pill" style="background:#e0f2fe;color:#0284c7;">
+                                            <i class="fas fa-file-alt"></i> Izin
+                                        </span>
+                                        @elseif($item->status == 'Sakit')
+                                        <span class="status-pill terlambat">
+                                            <i class="fas fa-thermometer-half"></i> Sakit
+                                        </span>
+                                        @else
+                                        <span class="status-pill alpha"><i class="fas fa-times"></i>
+                                            {{ $item->status }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="3" style="text-align:center; padding:32px; color:var(--gray-400);">
-                                            Belum ada data riwayat.</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:center; padding:32px; color:var(--gray-400);">
+                                        Belum ada data riwayat.</td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -677,47 +677,47 @@
                         </div>
                         <div style="padding:24px;">
                             @if($absen_hari_ini)
-                                @if($absen_hari_ini->status == 'Hadir')
-                                    <div class="status-banner hadir">
-                                        <i class="fas fa-check-circle fa-3x mb-3" style="color:var(--green)"></i>
-                                        <div style="font-size:22px; font-weight:800; color:var(--green);">SUDAH HADIR</div>
-                                        <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
-                                        </div>
-                                    </div>
-                                @elseif($absen_hari_ini->status == 'Izin')
-                                    <div class="status-banner" style="background:#e0f2fe;border:1.5px solid #7dd3fc;">
-                                        <i class="fas fa-file-alt fa-3x mb-3" style="color:#0284c7"></i>
-                                        <div style="font-size:22px; font-weight:800; color:#0284c7;">IZIN</div>
-                                        <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
-                                            <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
-                                        </div>
-                                    </div>
-                                @elseif($absen_hari_ini->status == 'Sakit')
-                                    <div class="status-banner terlambat">
-                                        <i class="fas fa-thermometer-half fa-3x mb-3" style="color:var(--yellow)"></i>
-                                        <div style="font-size:22px; font-weight:800; color:var(--yellow);">SAKIT</div>
-                                        <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
-                                            <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
-                                        </div>
-                                    </div>
-                                @else
-                                    <div class="status-banner tidak-hadir">
-                                        <i class="fas fa-times-circle fa-3x mb-3" style="color:var(--red)"></i>
-                                        <div style="font-size:22px; font-weight:800; color:var(--red);">TIDAK HADIR</div>
-                                        <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
-                                            <i class="fas fa-info-circle me-1"></i> Alpha / Tanpa Keterangan
-                                        </div>
-                                    </div>
-                                @endif
-                            @else
-                                <div class="status-banner belum">
-                                    <i class="fas fa-fingerprint fa-3x mb-3" style="color:var(--gray-400)"></i>
-                                    <div style="font-size:22px; font-weight:800; color:var(--gray-400);">BELUM ABSEN</div>
-                                    <div class="mt-2" style="font-size:13px; color:var(--gray-400);">Menunggu sensor...
-                                    </div>
+                            @if($absen_hari_ini->status == 'Hadir')
+                            <div class="status-banner hadir">
+                                <i class="fas fa-check-circle fa-3x mb-3" style="color:var(--green)"></i>
+                                <div style="font-size:22px; font-weight:800; color:var(--green);">SUDAH HADIR</div>
+                                <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
                                 </div>
+                            </div>
+                            @elseif($absen_hari_ini->status == 'Izin')
+                            <div class="status-banner" style="background:#e0f2fe;border:1.5px solid #7dd3fc;">
+                                <i class="fas fa-file-alt fa-3x mb-3" style="color:#0284c7"></i>
+                                <div style="font-size:22px; font-weight:800; color:#0284c7;">IZIN</div>
+                                <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
+                                    <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
+                                </div>
+                            </div>
+                            @elseif($absen_hari_ini->status == 'Sakit')
+                            <div class="status-banner terlambat">
+                                <i class="fas fa-thermometer-half fa-3x mb-3" style="color:var(--yellow)"></i>
+                                <div style="font-size:22px; font-weight:800; color:var(--yellow);">SAKIT</div>
+                                <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
+                                    <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
+                                </div>
+                            </div>
+                            @else
+                            <div class="status-banner tidak-hadir">
+                                <i class="fas fa-times-circle fa-3x mb-3" style="color:var(--red)"></i>
+                                <div style="font-size:22px; font-weight:800; color:var(--red);">TIDAK HADIR</div>
+                                <div class="mt-2" style="font-size:13px; color:var(--gray-600);">
+                                    <i class="fas fa-info-circle me-1"></i> Alpha / Tanpa Keterangan
+                                </div>
+                            </div>
+                            @endif
+                            @else
+                            <div class="status-banner belum">
+                                <i class="fas fa-fingerprint fa-3x mb-3" style="color:var(--gray-400)"></i>
+                                <div style="font-size:22px; font-weight:800; color:var(--gray-400);">BELUM ABSEN</div>
+                                <div class="mt-2" style="font-size:13px; color:var(--gray-400);">Menunggu sensor...
+                                </div>
+                            </div>
                             @endif
 
                             {{-- Info mahasiswa --}}
@@ -749,7 +749,8 @@
     </div>
 
     {{-- ══════════════════════════════════════════
-    MOBILE LAYOUT (< 768px) ══════════════════════════════════════════ --}} <div class="mobile-layout">
+    MOBILE LAYOUT (< 768px) ══════════════════════════════════════════ --}}
+    <div class="mobile-layout">
         <div class="app-wrapper">
 
             <div class="header-app">
@@ -776,51 +777,51 @@
                             Status Kehadiran Hari Ini</p>
 
                         @if($absen_hari_ini)
-                            @if($absen_hari_ini->status == 'Hadir')
-                                <i class="fas fa-check-circle text-success fa-3x mb-2"></i>
-                                <h3 class="fw-bold mb-0" style="color:var(--green)">SUDAH HADIR</h3>
-                                <div class="mt-3">
-                                    <span class="badge px-4 py-2 rounded-pill"
-                                        style="background:var(--green-light);color:var(--green);border:1px solid #6ee7b7;">
-                                        <i class="fas fa-clock me-1"></i>
-                                        {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
-                                    </span>
-                                </div>
-                            @elseif($absen_hari_ini->status == 'Izin')
-                                <i class="fas fa-file-alt fa-3x mb-2" style="color:#0284c7"></i>
-                                <h3 class="fw-bold mb-0" style="color:#0284c7">IZIN</h3>
-                                <div class="mt-3">
-                                    <span class="badge px-4 py-2 rounded-pill"
-                                        style="background:#e0f2fe;color:#0284c7;border:1px solid #7dd3fc;">
-                                        <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
-                                    </span>
-                                </div>
-                            @elseif($absen_hari_ini->status == 'Sakit')
-                                <i class="fas fa-thermometer-half fa-3x mb-2" style="color:var(--yellow)"></i>
-                                <h3 class="fw-bold mb-0" style="color:var(--yellow)">SAKIT</h3>
-                                <div class="mt-3">
-                                    <span class="badge px-4 py-2 rounded-pill"
-                                        style="background:var(--yellow-light);color:var(--yellow);border:1px solid #fcd34d;">
-                                        <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
-                                    </span>
-                                </div>
-                            @else
-                                <i class="fas fa-times-circle fa-3x mb-2" style="color:var(--red)"></i>
-                                <h3 class="fw-bold mb-0" style="color:var(--red)">TIDAK HADIR</h3>
-                                <div class="mt-3">
-                                    <span class="badge px-4 py-2 rounded-pill"
-                                        style="background:var(--red-light);color:var(--red);border:1px solid #fca5a5;">
-                                        <i class="fas fa-info-circle me-1"></i> Alpha / Tanpa Keterangan
-                                    </span>
-                                </div>
-                            @endif
+                        @if($absen_hari_ini->status == 'Hadir')
+                        <i class="fas fa-check-circle text-success fa-3x mb-2"></i>
+                        <h3 class="fw-bold mb-0" style="color:var(--green)">SUDAH HADIR</h3>
+                        <div class="mt-3">
+                            <span class="badge px-4 py-2 rounded-pill"
+                                style="background:var(--green-light);color:var(--green);border:1px solid #6ee7b7;">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') }} WIB
+                            </span>
+                        </div>
+                        @elseif($absen_hari_ini->status == 'Izin')
+                        <i class="fas fa-file-alt fa-3x mb-2" style="color:#0284c7"></i>
+                        <h3 class="fw-bold mb-0" style="color:#0284c7">IZIN</h3>
+                        <div class="mt-3">
+                            <span class="badge px-4 py-2 rounded-pill"
+                                style="background:#e0f2fe;color:#0284c7;border:1px solid #7dd3fc;">
+                                <i class="fas fa-info-circle me-1"></i> Izin Tidak Masuk
+                            </span>
+                        </div>
+                        @elseif($absen_hari_ini->status == 'Sakit')
+                        <i class="fas fa-thermometer-half fa-3x mb-2" style="color:var(--yellow)"></i>
+                        <h3 class="fw-bold mb-0" style="color:var(--yellow)">SAKIT</h3>
+                        <div class="mt-3">
+                            <span class="badge px-4 py-2 rounded-pill"
+                                style="background:var(--yellow-light);color:var(--yellow);border:1px solid #fcd34d;">
+                                <i class="fas fa-info-circle me-1"></i> Tidak Masuk Karena Sakit
+                            </span>
+                        </div>
                         @else
-                            <i class="fas fa-fingerprint fa-3x mb-2" style="color:var(--gray-400)"></i>
-                            <h3 class="fw-bold mb-0" style="color:var(--gray-400)">BELUM ABSEN</h3>
-                            <div class="mt-3">
-                                <span class="badge bg-light text-secondary border px-4 py-2 rounded-pill">Menunggu
-                                    Sensor...</span>
-                            </div>
+                        <i class="fas fa-times-circle fa-3x mb-2" style="color:var(--red)"></i>
+                        <h3 class="fw-bold mb-0" style="color:var(--red)">TIDAK HADIR</h3>
+                        <div class="mt-3">
+                            <span class="badge px-4 py-2 rounded-pill"
+                                style="background:var(--red-light);color:var(--red);border:1px solid #fca5a5;">
+                                <i class="fas fa-info-circle me-1"></i> Alpha / Tanpa Keterangan
+                            </span>
+                        </div>
+                        @endif
+                        @else
+                        <i class="fas fa-fingerprint fa-3x mb-2" style="color:var(--gray-400)"></i>
+                        <h3 class="fw-bold mb-0" style="color:var(--gray-400)">BELUM ABSEN</h3>
+                        <div class="mt-3">
+                            <span class="badge bg-light text-secondary border px-4 py-2 rounded-pill">Menunggu
+                                Sensor...</span>
+                        </div>
                         @endif
                     </div>
                 </div>
@@ -833,32 +834,44 @@
 
                 <div class="list-group border-0 pb-4">
                     @forelse($riwayat as $item)
-                        <div
-                            class="list-group-item history-item border-0 d-flex justify-content-between align-items-center mb-2 shadow-sm py-3 px-3">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3 rounded-circle d-flex align-items-center justify-content-center bg-light"
-                                    style="width:40px;height:40px;color:{{ $item->status == 'Hadir' ? 'var(--green)' : ($item->status == 'Terlambat' ? 'var(--yellow)' : 'var(--red)') }}">
-                                    <i
-                                        class="fas {{ $item->status == 'Hadir' ? 'fa-check' : ($item->status == 'Terlambat' ? 'fa-exclamation' : 'fa-times') }}"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fw-bold">{{ $item->status }}</h6>
-                                    <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y') }}</small>
-                                </div>
+                    <div
+                        class="list-group-item history-item border-0 d-flex justify-content-between align-items-center mb-2 shadow-sm py-3 px-3">
+                        <div class="d-flex align-items-center">
+                            @if($item->status == 'Hadir')
+                            <div class="me-3 rounded-circle d-flex align-items-center justify-content-center bg-light"
+                                style="width:40px;height:40px;color:#0a9f6e">
+                                <i class="fas fa-check"></i>
                             </div>
-                            <span class="fw-bold text-dark bg-light px-2 py-1 rounded border small">
-                                {{ \Carbon\Carbon::parse($item->waktu_masuk)->format('H:i') }}
-                            </span>
+                            @elseif($item->status == 'Terlambat')
+                            <div class="me-3 rounded-circle d-flex align-items-center justify-content-center bg-light"
+                                style="width:40px;height:40px;color:#d97706">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            @else
+                            <div class="me-3 rounded-circle d-flex align-items-center justify-content-center bg-light"
+                                style="width:40px;height:40px;color:#dc2626">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            @endif
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ $item->status }}</h6>
+                                <small
+                                    class="text-muted">{{ \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y') }}</small>
+                            </div>
                         </div>
+                        <span class="fw-bold text-dark bg-light px-2 py-1 rounded border small">
+                            {{ \Carbon\Carbon::parse($item->waktu_masuk)->format('H:i') }}
+                        </span>
+                    </div>
                     @empty
-                        <div class="text-center py-4 bg-white rounded-4 border">Belum ada data.</div>
+                    <div class="text-center py-4 bg-white rounded-4 border">Belum ada data.</div>
                     @endforelse
                 </div>
             </div>
 
             <script>
-                let statusAwal = "{{ $absen_hari_ini->status ?? 'belum' }}";
+                // GANTI dengan ini:
+                let idAbsenAwal = "{{ $absen_hari_ini->id ?? '' }}";
 
                 function cekStatusAbsen() {
                     fetch('{{ route("ortu.cek.status") }}')
@@ -868,8 +881,8 @@
                                 window.location.href = data.redirect;
                                 return;
                             }
-                            let statusBaru = data.ada_absen ? data.status : 'belum';
-                            if (statusBaru !== statusAwal) {
+                            let idBaru = data.id ?? '';
+                            if (idBaru !== idAbsenAwal) {
                                 window.location.reload();
                             }
                         })
@@ -895,32 +908,32 @@
             </div>
 
         </div>
-        </div>
+    </div>
 
-        {{-- Modal Logout (shared) --}}
-        <div class="modal fade modal-custom" id="modalLogout" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered mx-auto" style="max-width:350px;">
-                <div class="modal-content">
-                    <div class="modal-header py-3">
-                        <div class="text-white w-100 text-center">
-                            <h6 class="fw-bold mb-0">Konfirmasi Keluar</h6>
-                        </div>
+    {{-- Modal Logout (shared) --}}
+    <div class="modal fade modal-custom" id="modalLogout" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered mx-auto" style="max-width:350px;">
+            <div class="modal-content">
+                <div class="modal-header py-3">
+                    <div class="text-white w-100 text-center">
+                        <h6 class="fw-bold mb-0">Konfirmasi Keluar</h6>
                     </div>
-                    <div class="modal-body py-4">
-                        <p class="mb-0 fw-semibold">Yakin ingin keluar aplikasi?</p>
-                    </div>
-                    <div class="modal-footer pb-4">
-                        <button type="button" class="btn-cancel-custom" data-bs-dismiss="modal">Batal</button>
-                        <form action="{{ url('/logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn-logout-custom">Ya, Keluar</button>
-                        </form>
-                    </div>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="mb-0 fw-semibold">Yakin ingin keluar aplikasi?</p>
+                </div>
+                <div class="modal-footer pb-4">
+                    <button type="button" class="btn-cancel-custom" data-bs-dismiss="modal">Batal</button>
+                    <form action="{{ url('/logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn-logout-custom">Ya, Keluar</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

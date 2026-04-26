@@ -43,6 +43,7 @@ class OrtuController extends Controller
         $mahasiswa = Mahasiswa::find($id_mhs);
         $absen_hari_ini = Absensi::where('mahasiswa_id', $id_mhs)
             ->whereDate('created_at', now())
+            ->latest()
             ->first();
         $riwayat = Absensi::where('mahasiswa_id', $id_mhs)
             ->orderBy('created_at', 'desc')
@@ -70,52 +71,55 @@ class OrtuController extends Controller
     }
 
     public function apiCekAbsen(Request $request)
-{
-    date_default_timezone_set('Asia/Jakarta');
+    {
+        date_default_timezone_set('Asia/Jakarta');
 
-    // Coba restore session seperti biasa
-    $id_mhs = $this->restoreSession();
+        // Coba restore session seperti biasa
+        $id_mhs = $this->restoreSession();
 
-    // Jika masih kosong, cek apakah request dari Android (ada header Accept: application/json)
-    // Session Laravel sudah dibawa lewat Cookie header — tinggal baca dari auth
-    if (!$id_mhs) {
-        return response()->json(['ada_data' => false, 'unauthenticated' => true], 401);
+        // Jika masih kosong, cek apakah request dari Android (ada header Accept: application/json)
+        // Session Laravel sudah dibawa lewat Cookie header — tinggal baca dari auth
+        if (!$id_mhs) {
+            return response()->json(['ada_data' => false, 'unauthenticated' => true], 401);
+        }
+
+        $absen = \App\Models\Absensi::with('mahasiswa')
+            ->where('mahasiswa_id', $id_mhs)
+            ->where('created_at', '>=', now()->subSeconds(45))
+            ->latest()
+            ->first();
+
+        if ($absen) {
+            return response()->json([
+                'ada_data' => true,
+                'id'       => $absen->id,
+                'nama'     => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
+                'waktu'    => $absen->created_at->format('H:i:s'),
+                'status'   => $absen->status ?? 'hadir',
+            ]);
+        }
+
+        return response()->json(['ada_data' => false]);
     }
-
-    $absen = \App\Models\Absensi::with('mahasiswa')
-        ->where('mahasiswa_id', $id_mhs)
-        ->where('created_at', '>=', now()->subSeconds(45))
-        ->latest()
-        ->first();
-
-    if ($absen) {
-        return response()->json([
-            'ada_data' => true,
-            'id'       => $absen->id,
-            'nama'     => $absen->mahasiswa->nama_lengkap ?? 'Ananda',
-            'waktu'    => $absen->created_at->format('H:i:s'),
-            'status'   => $absen->status ?? 'hadir',
-        ]);
-    }
-
-    return response()->json(['ada_data' => false]);
-}
     public function cekStatusDashboard()
     {
         $id_mhs = $this->restoreSession();
-
         if (!$id_mhs) {
             return response()->json(['redirect' => '/login']);
         }
 
         $absen_hari_ini = Absensi::where('mahasiswa_id', $id_mhs)
             ->whereDate('created_at', now())
+            ->latest()   // ← tambah ini
             ->first();
 
         return response()->json([
             'ada_absen' => $absen_hari_ini ? true : false,
-            'status' => $absen_hari_ini->status ?? null,
-            'waktu' => $absen_hari_ini ? \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i') : null,
+            'status'    => $absen_hari_ini->status ?? null,
+            'id'        => $absen_hari_ini->id ?? null,   // ← tambah id
+            'waktu'     => $absen_hari_ini
+                ? \Carbon\Carbon::parse($absen_hari_ini->waktu_masuk)->format('H:i')
+                : null,
         ]);
     }
 }
