@@ -38,6 +38,8 @@ Route::get('/api/nama-mahasiswa', function (\Illuminate\Http\Request $request) {
     return response()->json(['nama' => $mhs->nama_lengkap]);
 });
 
+Route::get('/api/fingerprint/absen', [FingerprintController::class, 'absenHardware']);
+
 Route::get('/simulasi-alat/{finger_id}', function ($finger_id) {
     $request = new \Illuminate\Http\Request();
     $request->replace(['fingerprint_id' => $finger_id]);
@@ -82,7 +84,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/pengaturan', [AdminController::class, 'pengaturan'])->name('admin.pengaturan');
 
     Route::get('/admin/mahasiswa/registrasi/{id_finger}', [MahasiswaController::class, 'registrasi'])->name('mahasiswa.registrasi');
-    Route::resource('/admin/mahasiswa', MahasiswaController::class);
+    Route::resource('/admin/mahasiswa', MahasiswaController::class)->except(['show']);
 });
 
 // ============================================================

@@ -11,6 +11,21 @@ use Carbon\Carbon;
 
 class FingerprintController extends Controller
 {
+    // Fungsi khusus untuk menerima request murni dari alat ESP32
+    public function absenHardware(Request $request)
+    {
+        if (!$request->has('fingerprint_id')) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'ID jari kosong',
+                'data'    => null
+            ], 400);
+        }
+
+        // Lempar datanya ke fungsi store utama
+        return $this->store($request);
+    }
+
     public function store(Request $request)
     {
         $finger_id = $request->fingerprint_id;
@@ -21,7 +36,7 @@ class FingerprintController extends Controller
         if (!$mahasiswa) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'tidak terdaftar di database',
+                'message' => 'Tidak terdaftar di database',
                 'data'    => null
             ], 404);
         }
@@ -38,29 +53,34 @@ class FingerprintController extends Controller
         }
 
         // 3. Cek double absen hari ini di matkul yang sama
+        // Menggunakan zona waktu Jakarta agar sinkron dengan perangkat
+        $hari_ini = Carbon::today('Asia/Jakarta');
+        
         $cek_absen = Absensi::where('mahasiswa_id', $mahasiswa->id)
-            ->whereDate('created_at', Carbon::today())
+            ->whereDate('created_at', $hari_ini)
             ->where('nama_matkul', $pengaturan->nama_matkul)
             ->first();
 
         if ($cek_absen) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'sudah absen hari ini',
+                'message' => 'Sudah absen hari ini',
                 'data'    => [
                     'nama'             => $mahasiswa->nama_lengkap,
-                    'jam_masuk'        => Carbon::parse($cek_absen->waktu_masuk)->format('H:i:s'),
+                    'jam_masuk'        => Carbon::parse($cek_absen->waktu_masuk)->timezone('Asia/Jakarta')->format('H:i:s'),
                     'status_kehadiran' => $cek_absen->status,
                 ]
             ], 400);
         }
 
         // 4. Logika waktu
-        $jam_sekarang = Carbon::now()->format('H:i:s');
-        $batas_waktu  = $pengaturan->batas_waktu ?? '08:00:00';
+        // Kunci zona waktu ke WIB (Asia/Jakarta)
+        $waktu_sekarang = Carbon::now('Asia/Jakarta');
+        $jam_sekarang   = $waktu_sekarang->format('H:i:s');
+        $batas_waktu    = $pengaturan->batas_waktu ?? '08:00:00';
 
         if ($jam_sekarang > $batas_waktu) {
-            $status = 'Alpha';
+            $status = 'Terlambat'; // FIX: Diubah dari 'Alpha' menjadi 'Terlambat'
             $pesan  = 'Terlambat! Batas masuk jam ' . $batas_waktu;
         } else {
             $status = 'Hadir';
@@ -70,7 +90,7 @@ class FingerprintController extends Controller
         // 5. Simpan absensi
         Absensi::create([
             'mahasiswa_id' => $mahasiswa->id,
-            'waktu_masuk'  => Carbon::now(),
+            'waktu_masuk'  => $waktu_sekarang,
             'status'       => $status,
             'nama_matkul'  => $pengaturan->nama_matkul
         ]);
