@@ -53,7 +53,6 @@ class FingerprintController extends Controller
         }
 
         // 3. Cek double absen hari ini di matkul yang sama
-        // Menggunakan zona waktu Jakarta agar sinkron dengan perangkat
         $hari_ini = Carbon::today('Asia/Jakarta');
         
         $cek_absen = Absensi::where('mahasiswa_id', $mahasiswa->id)
@@ -73,15 +72,19 @@ class FingerprintController extends Controller
             ], 400);
         }
 
-        // 4. Logika waktu
-        // Kunci zona waktu ke WIB (Asia/Jakarta)
+        // 4. Logika waktu (DIUBAH MENGGUNAKAN CARBON OBJECT)
         $waktu_sekarang = Carbon::now('Asia/Jakarta');
-        $jam_sekarang   = $waktu_sekarang->format('H:i:s');
-        $batas_waktu    = $pengaturan->batas_waktu ?? '08:00:00';
+        
+        // Ambil batas waktu dari DB, default jam 08:00:00 jika kosong
+        $batas_waktu_str = $pengaturan->batas_waktu ?? '08:00:00';
+        
+        // Jadikan string batas waktu sebagai objek Carbon hari ini
+        $waktu_batas = Carbon::parse($batas_waktu_str, 'Asia/Jakarta');
 
-        if ($jam_sekarang > $batas_waktu) {
-            $status = 'Terlambat'; // FIX: Diubah dari 'Alpha' menjadi 'Terlambat'
-            $pesan  = 'Terlambat! Batas masuk jam ' . $batas_waktu;
+        // Bandingkan secara presisi menggunakan greaterThan()
+        if ($waktu_sekarang->greaterThan($waktu_batas)) {
+            $status = 'Terlambat';
+            $pesan  = 'Terlambat! Batas masuk jam ' . $waktu_batas->format('H:i');
         } else {
             $status = 'Hadir';
             $pesan  = 'Berhasil! Selamat belajar, ' . $mahasiswa->nama_lengkap . '.';
@@ -100,7 +103,7 @@ class FingerprintController extends Controller
             'message' => $pesan,
             'data'    => [
                 'nama'             => $mahasiswa->nama_lengkap,
-                'jam_masuk'        => $jam_sekarang,
+                'jam_masuk'        => $waktu_sekarang->format('H:i:s'),
                 'status_kehadiran' => $status,
             ]
         ], 200);
