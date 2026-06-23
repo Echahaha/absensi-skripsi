@@ -870,26 +870,55 @@
             </div>
 
             <script>
-                // GANTI dengan ini:
                 let idAbsenAwal = "{{ $absen_hari_ini->id ?? '' }}";
+                let isChecking = false;
 
                 function cekStatusAbsen() {
-                    fetch('{{ route("ortu.cek.status") }}')
-                        .then(res => res.json())
+                    if (isChecking) return;
+                    isChecking = true;
+
+                    fetch('{{ route("ortu.cek.status") }}', {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(res => {
+                            if (res.redirected || res.status === 401) {
+                                window.location.href = '/login';
+                                return null;
+                            }
+                            return res.json();
+                        })
                         .then(data => {
+                            if (!data) return;
                             if (data.redirect) {
                                 window.location.href = data.redirect;
                                 return;
                             }
-                            let idBaru = data.id ?? '';
-                            if (idBaru !== idAbsenAwal) {
+
+                            let idBaru = String(data.id ?? '');
+                            if (idBaru && idBaru !== String(idAbsenAwal)) {
                                 window.location.reload();
                             }
                         })
-                        .catch(err => console.log('Gagal cek status:', err));
+                        .catch(err => console.log('Gagal:', err))
+                        .finally(() => {
+                            isChecking = false;
+                        });
                 }
 
+                // 1. Polling tiap 10 detik (saat app terbuka terus)
                 setInterval(cekStatusAbsen, 10000);
+
+                // 2. Langsung cek saat app kembali dibuka / screen nyala
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible') {
+                        cekStatusAbsen();
+                    }
+                });
+
+                // 3. Cek sekali saat halaman pertama load
+                cekStatusAbsen();
             </script>
 
             <div class="bottom-nav">

@@ -85,7 +85,7 @@ class OrtuController extends Controller
 
         $absen = \App\Models\Absensi::with('mahasiswa')
             ->where('mahasiswa_id', $id_mhs)
-            ->where('created_at', '>=', now()->subSeconds(45))
+            ->where('created_at', '>=', now()->subHour())
             ->latest()
             ->first();
 
